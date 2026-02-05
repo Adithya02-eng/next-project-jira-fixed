@@ -7,31 +7,34 @@ import { useRouter } from "next/navigation"
 type ResponseType = InferResponseType<typeof client.api.workspaces[":workspaceId"]["$patch"],200>
 type RequestType = InferRequestType<typeof client.api.workspaces[":workspaceId"]["$patch"]>
 
-export const useUpdateWorkspace = ()=>{
-    const queryClient = useQueryClient()
-    const router = useRouter()
-    const mutation = useMutation<
-    
+export const useUpdateWorkspace = () => {
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  const mutation = useMutation<
     ResponseType,
     Error,
-    any
-    >({
-        mutationFn:async(payload)=>{
-            const response = await client.api.workspaces[":workspaceId"]["$patch"](payload as any);
-            if(!response.ok)
-            {
-                throw new Error("Failed to Update Workspace");
-            }
-            return await response.json();
-        },
-        onSuccess:({data})=>{
-            toast.success("Workspace updated")
-            queryClient.invalidateQueries({queryKey:["workspaces"]})
-            queryClient.invalidateQueries({queryKey:["workspace",data.$id]})
-        },
-        onError:()=>{
-            toast.error("Failed to update Workspace");
-        }
-    });
-    return mutation;
-}
+    RequestType
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await client.api.workspaces[":workspaceId"]["$patch"](payload);
+
+      if (!response.ok) {
+        throw new Error("Failed to update workspace");
+      }
+
+      return await response.json();
+    },
+    onSuccess: ({ data }) => {
+      toast.success("Workspace updated");
+      queryClient.invalidateQueries({ queryKey: ["workspaces"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace", data.$id] });
+    },
+    onError: () => {
+      toast.error("Failed to update Workspace");
+    },
+  });
+
+  return mutation;
+};

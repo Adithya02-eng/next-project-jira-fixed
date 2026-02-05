@@ -7,31 +7,37 @@ import { useRouter } from "next/navigation"
 type ResponseType = InferResponseType<typeof client.api.projects[":projectId"]["$delete"],200>
 type RequestType = InferRequestType<typeof client.api.projects[":projectId"]["$delete"]>
 
-export const useDeleteProject = ()=>{
-    const router = useRouter();
-    const queryClient = useQueryClient()
-    const mutation = useMutation<
+export const useDeleteProject = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<
     ResponseType,
     Error,
-    any
-    >({
-        mutationFn:async(payload)=>{
-            const response = await client.api.projects[":projectId"]["$delete"](payload as any);
-            if(!response.ok)
-            {
-                throw new Error("Failed to Delete project");
-            }
-            return await response.json();
-        },
-        onSuccess:({data})=>{
-            toast.success("Project Deleted")
-            //router.refresh()
-            queryClient.invalidateQueries({queryKey:["projects"]})
-            queryClient.invalidateQueries({queryKey:["project",data.$id]})
-        },
-        onError:()=>{
-            toast.error("Failed to Delete Project");
-        }
-    });
-    return mutation;
-}
+    RequestType
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await client.api.projects[":projectId"]["$delete"](payload);
+
+      if (!response.ok) {
+        throw new Error("Failed to delete project");
+      }
+
+      return await response.json();
+    },
+    onSuccess: ({ data }) => {
+      toast.success("Project Deleted");
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", data.$id] });
+
+      // Optional UX improvement
+      // router.push("/projects");
+    },
+    onError: () => {
+      toast.error("Failed to Delete Project");
+    },
+  });
+
+  return mutation;
+};

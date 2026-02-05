@@ -4,32 +4,38 @@ import { client } from "@/lib/rpc"
 import { toast } from "sonner"
 import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
-type ResponseType = InferResponseType<typeof client.api.tasks["bulk-update"]["$post"],200>
-type RequestType = InferRequestType<typeof client.api.tasks["bulk-update"]["$post"]>
+type ResponseType =
+  InferResponseType<typeof client.api.tasks["bulk-update"]["$post"], 200>;
 
-export const useBulkUpdateTasks = ()=>{
-    const router = useRouter()
-    const queryClient = useQueryClient()
-    const mutation = useMutation<
+type RequestType =
+  InferRequestType<typeof client.api.tasks["bulk-update"]["$post"]>;
+
+export const useBulkUpdateTasks = () => {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<
     ResponseType,
     Error,
-    any
-    >({
-        mutationFn:async(payload)=>{
-            const response = await client.api.tasks["/bulk-update"]["$post"](payload as any);
-            if(!response.ok)
-            {
-                throw new Error("Failed to Update tasks");
-            }
-            return await response.json();
-        },
-        onSuccess:({})=>{
-            toast.success("Tasks Updated")
-            queryClient.invalidateQueries({queryKey:["tasks"]})
-        },
-        onError:()=>{
-            toast.error("Failed to Update Tasks");
-        }
-    });
-    return mutation;
-}
+    RequestType
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await client.api.tasks["bulk-update"]["$post"](payload);
+
+      if (!response.ok) {
+        throw new Error("Failed to update tasks");
+      }
+
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast.success("Tasks Updated");
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: () => {
+      toast.error("Failed to Update Tasks");
+    },
+  });
+
+  return mutation;
+};

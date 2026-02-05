@@ -8,31 +8,34 @@ import { error } from "console"
 type ResponseType = InferResponseType<typeof client.api.auth.register["$post"]>
 type RequestType = InferRequestType<typeof client.api.auth.register["$post"]>
 
-export const useRegister = ()=>{
-    const router = useRouter();
-    const queryClient = useQueryClient()
-    const mutation = useMutation<
+export const useRegister = () => {
+  const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation<
     ResponseType,
     Error,
     RequestType
-    >({
-        mutationFn:async(payload)=>{
-            const response = await client.api.auth.register["$post"]({json: payload as any});
-            if(!response.ok)
-            {
-                throw new Error("Something Wrong");
-            }
-            return await response.json();
-        },
-        onSuccess:()=>{
-            toast.success("Registered-Successfully")
-            router.refresh()
-            queryClient.invalidateQueries({queryKey:["current"]}) 
-        },
-        onError:()=>{
-            toast.error("Failed to Register")
-        }
-    });
+  >({
+    mutationFn: async (payload) => {
+      const response =
+        await client.api.auth.register["$post"](payload);
 
-    return mutation;
-}
+      if (!response.ok) {
+        throw new Error("Something went wrong");
+      }
+
+      return await response.json();
+    },
+    onSuccess: () => {
+      toast.success("Registered Successfully");
+      router.refresh();
+      queryClient.invalidateQueries({ queryKey: ["current"] });
+    },
+    onError: () => {
+      toast.error("Failed to Register");
+    },
+  });
+
+  return mutation;
+};
